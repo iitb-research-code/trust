@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from geomloss import SamplesLoss
 from torch.utils.data import DataLoader, Dataset
 
-class WASSAL(Strategy):
+class WASSAL_Refrain(Strategy):
     
     """
     
@@ -36,7 +36,7 @@ class WASSAL(Strategy):
     
     def __init__(self, labeled_dataset, unlabeled_dataset, query_dataset,net, nclasses, args={}): #
         
-        super(WASSAL, self).__init__(labeled_dataset, unlabeled_dataset, net, nclasses, args)        
+        super(WASSAL_Refrain, self).__init__(labeled_dataset, unlabeled_dataset, net, nclasses, args)        
         self.query_dataset = query_dataset
 
     def _proj_simplex(self,v):
@@ -84,43 +84,57 @@ class WASSAL(Strategy):
             print('There are',unlabeled_dataset_len,'Unlabeled dataset')
         
         #uniform distribution of weights
-        simplex_target= Variable(torch.ones(unlabeled_dataset_len, requires_grad=True, device=self.device)/unlabeled_dataset_len)
+        simplex_target = Variable(torch.ones(unlabeled_dataset_len, requires_grad=True, device=self.device)/unlabeled_dataset_len)
+        simplex_refrain = Variable(torch.ones(unlabeled_dataset_len, requires_grad=True, device=self.device)/unlabeled_dataset_len)
         query_dataset_len = len(self.query_dataset)
+        private_dataset_len = len(self.private_dataset)
         beta = torch.ones(query_dataset_len)/query_dataset_len
+        gamma = torch.ones(private_dataset_len)/private_dataset_len
+
         loss_func = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8)
+
         unlabeled_dataloader = DataLoader(dataset=self.unlabeled_dataset, batch_size=unlabeled_dataset_len, shuffle=False)
-        target_dataloader = DataLoader(dataset=self.query_dataset, batch_size=20, shuffle=False)
+        target_dataloader = DataLoader(dataset=self.query_dataset, batch_size=query_dataset_len, shuffle=False)
+        refrain_dataloader = DataLoader(dataset=self.private_dataset, batch_size=private_dataset_len, shuffle=False)
+
         unlabeled_iter = iter(unlabeled_dataloader)
         target_iter=iter(target_dataloader)
-        unlabeled_imgs=next(unlabeled_iter)
-        unlabeled_imgs=unlabeled_imgs[:,0,:,:]
+        refrain_iter = iter(refrain_dataloader)
 
-        target_imgs=next(target_iter)
-        target_imgs=target_imgs[0][:,0,:,:]
+        unlabeled_imgs = next(unlabeled_iter)
+        unlabeled_imgs = unlabeled_imgs[:,0,:,:]
+        target_imgs, _ = next(target_iter)
+        target_imgs = target_imgs[:,0,:,:]
+        refrain_imgs, _ = next(refrain_iter)
+        refrain_imgs = refrain_imgs[:,0,:,:]
+
         unlabeled_imgs = unlabeled_imgs.to(self.device)
         unlabeled_imgs.requires_grad = True
-        
-        
         target_imgs=target_imgs.to(self.device)
+        refrain_imgs = refrain_imgs.to(self.device)
         beta = beta.to(self.device)
+        gamma = gamma.to(self.device)
         
         optimizer = torch.optim.Adam([simplex_target], lr=self.args['wd_lr'])
         simplex_target.requires_grad = True
         for i in range(self.args['wd_num_epochs']):
             optimizer.zero_grad()
-            # unlabeled_imgs.requires_grad = False
-            # target_imgs.requires_grad = False
-            # simplex_target.requires_grad = True
-            loss=loss_func(simplex_target, unlabeled_imgs.view(len(unlabeled_imgs), -1), beta, target_imgs.view(len(target_imgs), -1))
+            loss_1 = loss_func(simplex_target, unlabeled_imgs.view(len(unlabeled_imgs), -1), beta, target_imgs.view(len(target_imgs), -1))
+            loss_2 = loss_func(simplex_refrain, unlabeled_imgs.view(len(unlabeled_imgs), -1), gamma, refrain_imgs.view(len(refrain_imgs), -1))
+            loss_3 = loss_func(simplex_target, unlabeled_imgs.view(len(unlabeled_imgs), -1), simplex_refrain, unlabeled_imgs.view(len(unlabeled_imgs), -1))
+            loss = loss_1 + loss_2 - self.args['h']*loss_3
             loss.backward()
             optimizer.step()
             with torch.no_grad():
                 simplex_target.copy_(Variable(self._proj_simplex(simplex_target.cpu().detach()).to(self.device)))
-        print('Wassertein loss:',loss.item())
+                simplex_refrain.copy_(Variable(self._proj_simplex(simplex_refrain.cpu().detach()).to(self.device)))
+        
+        print("loss:{}, loss_1:{}, loss_2:{}, loss_3:{}, h={}".format(loss.item(), loss_1.item(), loss_2.item(), loss_3.item(), self.args['h']))
 
         sorted_simplex,indices=torch.sort(simplex_target,descending=True)
         if(self.args['verbose']):
             print('length of unlabelled dataset',str(len(unlabeled_imgs)))
             print('Totals Probability of the budget:',str(torch.sum(sorted_simplex[:budget])))
             print('selected indices len ',len(torch.Tensor.tolist(indices[:budget])))
+
         return torch.Tensor.tolist(indices[:budget])

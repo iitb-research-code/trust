@@ -236,17 +236,16 @@ def load_biodataset_custom(datadir, dset_name, feature, split_cfg, augVal=False,
     if(dset_name[-5:]=="mnist"):
         num_cls=name_to_class[dset_name][1]
         datadir = datadir
-        input_size = 32
+        input_size = 28
         data_transforms = {
             'train' : transforms.Compose([
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
+                
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5],std=[0.5])
+                
             ]),
             'test' : transforms.Compose([
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5],std=[0.5])
+                
             ])
         }
 
