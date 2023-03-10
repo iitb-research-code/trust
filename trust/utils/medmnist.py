@@ -61,7 +61,7 @@ class MedMNIST(Dataset):
 
     def __getitem__(self, index):
         data, target = self.data[index], self.targets[index].astype(int)
-        data = Image.fromarray(np.uint8(data))
+        data = Image.fromarray(data)
 
         if self.transform is not None:
             data = self.transform(data)

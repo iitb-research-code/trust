@@ -115,9 +115,10 @@ class WASSAL_Refrain(Strategy):
         beta = beta.to(self.device)
         gamma = gamma.to(self.device)
         
-        optimizer = torch.optim.Adam([simplex_target], lr=self.args['wd_lr'])
+        optimizer = torch.optim.Adam([simplex_target, simplex_refrain], lr=0.02)
         simplex_target.requires_grad = True
-        for i in range(self.args['wd_num_epochs']):
+        simplex_refrain.requires_grad = True
+        for i in range(50):
             optimizer.zero_grad()
             loss_1 = loss_func(simplex_target, unlabeled_imgs.view(len(unlabeled_imgs), -1), beta, target_imgs.view(len(target_imgs), -1))
             loss_2 = loss_func(simplex_refrain, unlabeled_imgs.view(len(unlabeled_imgs), -1), gamma, refrain_imgs.view(len(refrain_imgs), -1))
@@ -131,10 +132,15 @@ class WASSAL_Refrain(Strategy):
         
         print("loss:{}, loss_1:{}, loss_2:{}, loss_3:{}, h={}".format(loss.item(), loss_1.item(), loss_2.item(), loss_3.item(), self.args['h']))
 
-        sorted_simplex,indices=torch.sort(simplex_target,descending=True)
-        if(self.args['verbose']):
+        sorted_target,indices=torch.sort(simplex_target,descending=True)
+        sorted_refrain,rindices=torch.sort(simplex_refrain,descending=True)
+        in_target_not_refrain=torch.tensor(list(set(indices[:200].tolist())-set(rindices[:300].tolist())))
+        if(True):
             print('length of unlabelled dataset',str(len(unlabeled_imgs)))
-            print('Totals Probability of the budget:',str(torch.sum(sorted_simplex[:budget])))
+            print('Totals Probability of the budget:',str(torch.sum(sorted_target[:budget])))
             print('selected indices len ',len(torch.Tensor.tolist(indices[:budget])))
+        self.simplex_target = simplex_target
+        self.simplex_refrain = simplex_refrain
+        # self.update_simplexes(simplex_target, simplex_refrain)
 
-        return torch.Tensor.tolist(indices[:budget])
+        return torch.Tensor.tolist(in_target_not_refrain[:budget])

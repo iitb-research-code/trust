@@ -52,3 +52,40 @@ tutorials/wassal/backkup/5_pneumoniamnist_ResNet18_0.0003_[0, 1]
 tutorials/wassal/pneumoniamnist_ResNet18_0.0003_[0, 1]
 tutorials/wassal/pneumoniamnist_ResNet18_0.0003_[0, 1]
 tutorials/pneumoniamnist_ResNet18_0.0003_[0, 1]
+CBOW_Final/cbow.py
+CBOW_Final/data/index_to_word.json
+CBOW_Final/data/TD_word_w4_b0.json
+CBOW_Final/data/word_to_index.json
+CBOW_Final/data/error/CBOW_error_tag_epoch0.json
+CBOW_Final/data/error/CBOW_error_tag_epoch1.json
+CBOW_Final/data/error/CBOW_error_tag_epoch2.json
+CBOW_Final/data/error/CBOW_error_tag_epoch3.json
+CBOW_Final/data/error/CBOW_error_tag_epoch4.json
+CBOW_Final/data/error/CBOW_error_tag_epoch5.json
+CBOW_Final/data/error/CBOW_error_tag_epoch6.json
+CBOW_Final/data/error/CBOW_error_tag_epoch7.json
+CBOW_Final/data/error/CBOW_error_tag_epoch8.json
+CBOW_Final/data/error/CBOW_error_tag_epoch9.json
+CBOW_Final/data/error/CBOW_error_tag_epoch10.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch0.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch1.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch2.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch3.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch4.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch5.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch6.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch7.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch8.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch9.json
+CBOW_Final/data/weight/CBOW_W1_tag_epoch10.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch0.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch1.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch2.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch3.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch4.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch5.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch6.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch7.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch8.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch9.json
+CBOW_Final/data/weight/CBOW_W2_tag_epoch10.json

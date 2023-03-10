@@ -36,6 +36,10 @@ class Strategy:
 
     def update_privates(self, private_dataset):
         self.private_dataset= private_dataset
+    
+    def update_simplexes(self, simplex_target, simplex_refrain):
+        self.simplex_target = simplex_target
+        self.simplex_refrain = simplex_refrain
 
     def update_model(self, clf):
         self.model = clf
